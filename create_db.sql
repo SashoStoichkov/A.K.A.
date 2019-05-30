@@ -1,0 +1,18 @@
+CREATE TABLE IF NOT EXISTS Deck(
+    id INTEGER PRIMARY KEY AUTOINCREMENT, 
+    name TEXT NOT NULL,
+    parent_id INTEGER,
+    FOREIGN KEY(parent_id) REFERENCES Deck(id)
+);
+
+CREATE TABLE IF NOT EXISTS Card(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    EF REAL NOT NULL,
+    front TEXT NOT NULL,
+    back TEXT NOT NULL,
+    due_date INTEGER NOT NULL,
+    last_interval INTEGER,
+    deck_id INTEGER,
+    FOREIGN KEY(deck_id) REFERENCES Deck(id)
+);
+
