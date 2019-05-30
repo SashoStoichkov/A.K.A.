@@ -1,5 +1,5 @@
 import sqlite3
-DB_NAME = 'database.db'
+import const
 
 
 class DBManager:
@@ -37,6 +37,6 @@ class DBManager:
     
 
 if __name__ == "__main__":
-    dbm = DBManager(DB_NAME)
+    dbm = DBManager(const.DB_NAME)
     # [print(row_data) for row_data in dbm.get_decks()]
     [print(card) for card in dbm.get_cards_for_deck(1)]
