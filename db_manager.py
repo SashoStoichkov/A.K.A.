@@ -34,6 +34,8 @@ class DBManager:
 
         cards = self.cursor.fetchall()
         return cards
+
+    
     
 
 if __name__ == "__main__":
