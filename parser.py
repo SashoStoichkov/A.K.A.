@@ -1,6 +1,8 @@
-import db_manager
+from db_manager import DBManager
+import const
 
 from decks import Deck
+
 
 def create_decks(deck_rows):
     created_decks = {}
@@ -22,10 +24,13 @@ def create_decks(deck_rows):
                 break                
     return created_decks
 
+
 def populate_decks(created_decks):
+    dbm = DBManager(const.DB_NAME)
     for deck_id, deck in created_decks.items():
-        for card in get_cards_for_deck(deck_id):
+        for card_row in DBManager.get_cards_for_deck(deck_id):
+            
             deck.add_card(card)
 
-lst = db_manager.DBManager('database.db').get_decks()
 
+lst = db_manager.DBManager('database.db').get_decks()
