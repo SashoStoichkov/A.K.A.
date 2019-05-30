@@ -24,10 +24,10 @@ class DBManager:
 
     def get_cards_for_deck(self, deck_id):
         query = """\
-        SELECT * FROM Card
-	        INNER JOIN Deck
-		        ON Card.deck_id = Deck.id
-        WHERE Deck.id = ?
+            SELECT EF, front, back, due_time, last_interval FROM Card
+            	INNER JOIN Deck
+            		ON Card.deck_id = Deck.id
+            WHERE Deck.id = ?;
         """
 
         self.cursor.execute(query, (deck_id, ))
@@ -35,7 +35,6 @@ class DBManager:
         cards = self.cursor.fetchall()
         return cards
 
-    
     
 
 if __name__ == "__main__":
