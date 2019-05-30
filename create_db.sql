@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS Card(
     EF REAL NOT NULL,
     front TEXT NOT NULL,
     back TEXT NOT NULL,
-    due_date INTEGER NOT NULL,
+    due_time INTEGER NOT NULL,
     last_interval INTEGER,
     deck_id INTEGER,
     FOREIGN KEY(deck_id) REFERENCES Deck(id)
