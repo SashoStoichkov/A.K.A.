@@ -24,7 +24,7 @@ class DBManager:
 
     def get_cards_for_deck(self, deck_id):
         query = """\
-            SELECT EF, front, back, due_time, last_interval FROM Card
+            SELECT Card.id, EF, front, back, due_time, last_interval FROM Card
             	INNER JOIN Deck
             		ON Card.deck_id = Deck.id
             WHERE Deck.id = ?;
@@ -36,6 +36,14 @@ class DBManager:
         return cards
 
     
+    # def add_card(self, deck_id, card_obj):
+    #     query = """\
+    #         INSERT INTO Card(EF, front, back, due_time, last_interval, deck_id) 
+    #         VALUES(2.5, "WHo am I?", "Sasho", "2019-05-30", null, ?)
+    #     """
+
+    #     self.cursor.execute(query, (deck_id))
+
 
 if __name__ == "__main__":
     dbm = DBManager(const.DB_NAME)
