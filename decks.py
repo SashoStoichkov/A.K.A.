@@ -5,15 +5,16 @@ class Deck:
     attributes: self.name, self.subdecks, self.cards, self.due_cards
     """
 
-    def __init__(self, name):
+    def __init__(self, id, name):
         self.name = name
+        self.id = id
         self.subdecks = {}
-        self.cards = set()
+        self.cards = []
         self.due_cards = set()
-    
+
     def add_card(self, card):
         raise NotImplementedError
-
+        
     def remove_card(self):
         raise NotImplementedError
     
