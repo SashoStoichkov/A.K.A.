@@ -7,11 +7,9 @@ class DBManager:
         self.conn = sqlite3.connect(db_name)
         self.cursor = self.conn.cursor()
 
-    def commit(self, func):
-        def func_wrapper(*args, **kwrags):
-            func(*args, **kwrags)
-            self.conn.commit()
-        return func_wrapper
+
+    def commit(self):
+        self.conn.commit()
 
     def get_decks(self):
         query ="""\
@@ -20,6 +18,7 @@ class DBManager:
         self.cursor.execute(query)
 
         data = self.cursor.fetchall()
+        self.commit()
         return data
 
     def get_cards_for_deck(self, deck_id):
@@ -31,9 +30,18 @@ class DBManager:
         """
 
         self.cursor.execute(query, (deck_id, ))
-
         cards = self.cursor.fetchall()
+        self.commit()
         return cards
+
+    def update_card(self, card_dict):
+        query = """\
+            UPDATE Card SET EF=:EF, front=:front, back=:back, due_time=:due_time, last_interval=:last_interval, deck_id=:deck_id
+            WHERE id = :id;
+        """
+
+        self.cursor.execute(query, card_dict)
+        self.commit()
 
     
     # def add_card(self, deck_id, card_obj):
