@@ -1,7 +1,7 @@
 import sys
 from fbs_runtime.application_context import ApplicationContext
 
-from start_screen import StartScreen
+from screens import StartScreen
 
 if __name__ == "__main__":
     app = ApplicationContext()
