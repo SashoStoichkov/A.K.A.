@@ -44,3 +44,4 @@ class Parser:
             
         
 cd = Parser(const.DB_NAME).create_decks()
+
