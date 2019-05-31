@@ -1,10 +1,10 @@
 import sys
 from fbs_runtime.application_context import ApplicationContext
 
-from screens import StartScreen
+import screens
 
 if __name__ == "__main__":
     app = ApplicationContext()
-    s = StartScreen()
+    s = screens.StartScreen()
     s.show()
     sys.exit(app.app.exec_())

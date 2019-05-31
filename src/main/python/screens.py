@@ -1,19 +1,26 @@
 import sys
 import PyQt5 as p
 
-class CustomWidget(p.QtWidgets.QWidget):
+class DeckInfoButton(p.QtWidgets.QWidget):
     def __init__(self, parent=None):
-        super(CustomWidget, self).__init__(parent)
+        super(DeckInfoButton, self).__init__(parent)
         self.button = p.QtWidgets.QPushButton("Open deck")
+        self.button.clicked.connect(self.goToDeckInfo)
         lay = p.QtWidgets.QHBoxLayout(self)
         lay.addWidget(self.button, alignment=p.QtCore.Qt.AlignRight)
         lay.setContentsMargins(2, 2, 2, 2)
+
+    def goToDeckInfo(self):
+        self.deck_info = DeckInfoScreen()
+        self.deck_info.show()
 
 class StartScreen(p.QtWidgets.QDialog):
     def __init__(self, parent=None):
         super(StartScreen, self).__init__(parent)
 
         self.originalPalette = p.QtWidgets.QApplication.palette()
+
+        self.setWindowTitle("Welcome to Auswendiglernen!")
 
         title = p.QtWidgets.QLabel("Decks:")
         title.setFont(p.QtGui.QFont("Times", 50))
@@ -43,7 +50,7 @@ class StartScreen(p.QtWidgets.QDialog):
 
             self.model.appendRow(item)
 
-            self.list.setIndexWidget(item.index(), CustomWidget())
+            self.list.setIndexWidget(item.index(), DeckInfoButton())
 
         main_layout = p.QtWidgets.QGridLayout()
         main_layout.addLayout(top_layout, 0, 0, 1, 1)
@@ -51,3 +58,23 @@ class StartScreen(p.QtWidgets.QDialog):
         self.setLayout(main_layout)
 
         self.showMaximized()
+
+class DeckInfoScreen(p.QtWidgets.QDialog):
+    def __init__(self, parent=None):
+        super(DeckInfoScreen, self).__init__(parent)
+
+        self.originalPalette = p.QtWidgets.QApplication.palette()
+        
+        self.setWindowTitle("Deck Info")
+
+        layoutV = p.QtWidgets.QVBoxLayout()
+        self.pushButton = p.QtWidgets.QPushButton(self)
+        self.pushButton.setText('Back to Start!')
+        self.pushButton.clicked.connect(self.goToStart)
+        layoutV.addWidget(self.pushButton)
+
+        self.showMaximized()
+
+    def goToStart(self):
+        self.start = StartScreen()
+        self.start.show()
