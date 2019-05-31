@@ -2,12 +2,13 @@ import sqlite3
 
 class Deck:
     """
-    attributes: self.name, self.subdecks, self.cards, self.due_cards
+    attributes: self.name, self.subdecks, self.cards, self.due_cards, self.dbm
     """
 
-    def __init__(self, id, name):
+    def __init__(self, id, name, dbm):
         self.name = name
         self.id = id
+        self.dbm = dbm
         self.subdecks = {}
         self.cards = []
         self.due_cards = set()
@@ -21,3 +22,4 @@ class Deck:
     def refresh(self):
         # updates @self.due_cards
         raise NotImplementedError
+
