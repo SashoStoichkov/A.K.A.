@@ -2,18 +2,18 @@ import utils
 
 class Card:
     """
-    attributes: id, front, back, due_time, last_interval, EF, deck
+    attributes: id, front, back, due_time, last_interval, EF, deck, dbm
     """
     
     def __init__(self, deck, id, front, back, due_time, last_interval, EF, dbm):
-        self.deck=deck
-        self.id = id
-        self.front = front
-        self.back = back
-        self.due_time = due_time
-        self.last_interval = last_interval
-        self.EF = EF
-        self.dbm = dbm
+        self.__dict__['deck'] = deck
+        self.__dict__['id'] = id
+        self.__dict__['front'] = front
+        self.__dict__['back'] = back
+        self.__dict__['due_time'] = due_time
+        self.__dict__['last_interval'] = last_interval
+        self.__dict__['EF'] = EF
+        self.__dict__['dbm'] = dbm
 
     @staticmethod
     def new(front, back):
