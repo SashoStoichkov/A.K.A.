@@ -8,7 +8,7 @@ from cards import Card
 
 class Loader:
     def __init__(self, dbname):
-        self.session = models.func(dbname)
+        self.conn = sqlite3.connect(dbname)
 
     @property
     def deck_rows(self):
@@ -44,6 +44,7 @@ class Loader:
         return cards
 
     def load(self):
+        # returns a collection?
         def create():
             created_decks = {} # maps ids to decks            
             deck_rows = self.deck_rows
@@ -71,7 +72,11 @@ class Loader:
 
         return populate(create())
             
-        
-cd = Loader(const.DB_NAME).load()
-deck1 = cd[1]
-card1, card2 = deck1.cards
+
+loader = Loader(const.DB_NAME)
+cd = loader.load()
+proglang = cd[1]
+python = proglang.subdecks['Python']
+c = proglang.subdecks['C']
+newdeck = Deck.new(name='Syntax', parent=c, conn=loader.conn)
+newdeck.create_card('C syntax question 1', 'C syntax answer 1')
