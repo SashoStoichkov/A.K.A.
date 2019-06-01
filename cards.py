@@ -24,27 +24,6 @@ class Card:
         self.EF = EF
         self.deck = deck
         self.conn = conn
-
-    @staticmethod
-    def new(front, back, deck, conn):
-        dct = dict(id=utils.getid(conn, 'card'), front=front, back=back,
-                   deck=deck, due=utils.today(), last_interval=None,
-                   EF=2.5, conn=conn)
-        new_card = Card(**dct)
-
-        ##################################################
-        # insert into the card into the database
-        
-        # dct contains almost all attributes needed for inserting
-        # a row into the database, except deck_id
-        dct['deck_id'] = deck.id
-        
-        conn.execute("""
-            INSERT INTO card (id, front, back, deck_id, due, last_interval, EF)
-            VALUES (:id, :front, :back, :deck_id, :due, :last_interval, :EF)""",
-                     dct)
-        
-        conn.commit()
                 
     def flush(self):
         dct = {attr: getattr(self, attr) for attr in ('id', 'front', 'back', 'due', 'last_interval', 'EF')}
@@ -59,13 +38,15 @@ class Card:
         self.conn.execute(query, dct)
         self.conn.commit()
 
-    def reschedule(self, ans):
-        self.EF = max(1.3, min(2.5, self.EF - 0.8 + 0.28 * ans - 0.02 * ans * ans))
-        self.last_interval = int((1 if self.last_interval is None
-                                  else 6 if self.last_interval is 1
-                                  else self.last_interval * self.EF))
-        self.due = utils.today() + self.last_interval
 
-    def removed_from_deck(self):
-        # called when the card is removed from it's deck
-        self.conn.execute('DELETE FROM card WHERE id = ?', (self.id,))
+    def reschedule(self, ans):
+        # ans is an int such that 0 <= ans <= 5
+        self.EF = max(1.3, min(2.5, self.EF-0.8+0.28*q-0.02*q*q))
+        if ans < 3:
+            self.last_interval = None
+            self.due = utils.today() + 1
+        else:
+            self.last_interval = int(1 if self.last_interval is None
+                                     else 6 if self.last_interval == 1
+                                     else self.last_interval * self.EF)
+            self.due = utils.today() + self.last_interval
