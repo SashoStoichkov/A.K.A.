@@ -48,8 +48,7 @@ class Card:
                      dct)
         
         conn.commit()
-        
-        
+                
     def flush(self):
         dct = {attr: getattr(self, attr) for attr in ('id', 'front', 'back', 'due', 'last_interval', 'EF')}
         dct['deck_id'] = self.deck.id
@@ -62,3 +61,10 @@ class Card:
 
         self.conn.execute(query, dct)
         self.conn.commit()
+
+    def reschedule(self, ans):
+        self.EF = max(1.3, min(2.5, self.EF - 0.8 + 0.28 * ans - 0.02 * ans * ans))
+        self.last_interval = int((1 if self.last_interval is None
+                                  else 6 if self.last_interval is 1
+                                  else self.last_interval * self.EF))
+        self.due = utils.today() + self.last_interval

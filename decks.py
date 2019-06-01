@@ -25,9 +25,5 @@ class Deck:
     def remove_card(self):
         raise NotImplementedError
     
-    def refresh(self):
-        # updates @self.due_cards
-        raise NotImplementedError
-
     def flush(self):
         raise NotImplementedError
