@@ -1,7 +1,5 @@
 import utils
 
-# invariant: all cards and decks have a reference to the same DBManager instance
-
 class Card:
     """
     * attributes:
@@ -17,7 +15,7 @@ class Card:
       persistent storage of the card
     """
 
-    def __init__(self, id, front, back, due, last_interval, EF, deck, conn):
+    def __init__(self, id, front, back, deck, conn, due, last_interval, EF):
         self.id = id
         self.front = front
         self.back = back
@@ -33,7 +31,6 @@ class Card:
                    deck=deck, due=utils.today(), last_interval=None,
                    EF=2.5, conn=conn)
         new_card = Card(**dct)
-        deck.cards.append(new_card)
 
         ##################################################
         # insert into the card into the database
@@ -53,7 +50,7 @@ class Card:
         dct = {attr: getattr(self, attr) for attr in ('id', 'front', 'back', 'due', 'last_interval', 'EF')}
         dct['deck_id'] = self.deck.id
         
-        query = """\
+        query = """
             UPDATE Card SET EF=:EF, front=:front, back=:back, due=:due,
                             last_interval=:last_interval, deck_id=:deck_id
             WHERE id = :id;
@@ -68,3 +65,7 @@ class Card:
                                   else 6 if self.last_interval is 1
                                   else self.last_interval * self.EF))
         self.due = utils.today() + self.last_interval
+
+    def removed_from_deck(self):
+        # called when the card is removed from it's deck
+        self.conn.execute('DELETE FROM card WHERE id = ?', (self.id,))

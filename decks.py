@@ -7,7 +7,7 @@ class Deck:
       as the connection between the instance and the database.
     - self.name
     - self.subdecks: a dict which maps names to decks (with the same name)
-    - self.cards: a list of Card instances
+    - self.cards: a dict which maps card ids to cards
     - self.conn: a connection to the database which contains the
       persistent storage of the deck
     """
@@ -16,14 +16,18 @@ class Deck:
         self.id = id
         self.name = name
         self.subdecks = {}
-        self.cards = []
+        self.cards = {}
         self.conn = conn
-
-    def add_card(self, card):
-        raise NotImplementedError
         
-    def remove_card(self):
-        raise NotImplementedError
-    
+    def add_card(self, card):
+        self.cards[card.id] = card
+        
+    def remove_card(self, card_id):
+        card = self.cards.get(card_id)
+        if card is None:
+            raise ValueError(f"the deck doesn't have a card with id {card_id}")
+        del self.cards[card_id]
+        card.removed_from_deck()
+            
     def flush(self):
         raise NotImplementedError
