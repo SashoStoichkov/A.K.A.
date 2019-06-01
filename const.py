@@ -3,11 +3,14 @@ DB_NAME = 'dummy.db'
 STUB_NAME = "stub.db"
 
 PURGE_STUB_SCRIPT = """\
+    BEGIN TRANSACTION;
     DELETE FROM Deck;
     DELETE FROM Card;
+    END TRANSACTION;
 """
 
 CREATE_STUB_SCRIPT = """\
+BEGIN TRANSACTION;
 CREATE TABLE IF NOT EXISTS Deck(
     id INTEGER PRIMARY KEY, 
     name TEXT NOT NULL,
@@ -53,4 +56,5 @@ INSERT INTO card (front, back, ef, due, last_interval, deck_id) VALUES
 
 INSERT INTO card (front, back, ef, due, last_interval, deck_id) VALUES
 ('C question 3', 'C answer 3', 1.2, 6542, 98, 2);
+END TRANSACTION;
 """
