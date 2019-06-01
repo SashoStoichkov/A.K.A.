@@ -1,1 +1,1 @@
-DB_NAME = 'database.db'
+DB_NAME = 'dummy.db'
