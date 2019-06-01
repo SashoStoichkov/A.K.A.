@@ -8,7 +8,7 @@ from cards import Card
 
 class Loader:
     def __init__(self, dbname):
-        self.conn = sqlite3.connect(dbname)
+        self.session = models.func(dbname)
 
     @property
     def deck_rows(self):
@@ -42,13 +42,13 @@ class Loader:
         cards = cursor.fetchall()
         self.conn.commit()
         return cards
-            
+
     def load(self):
         def create():
             created_decks = {} # maps ids to decks            
-            deck_rows = self.deck_rows            
+            deck_rows = self.deck_rows
             for deck_row in deck_rows:
-                current_id, current_name, parent_id = deck_row                    
+                current_id, current_name, parent_id = deck_row
                 if parent_id is None:
                     # the row represents a root deck
                     current_deck = Deck(id=current_id, name=current_name, conn=self.conn)
