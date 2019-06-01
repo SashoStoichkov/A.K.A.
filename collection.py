@@ -229,10 +229,13 @@ class Collection:
         
     def create_card(self, front, back, deck_name):
         deck = self._find_deck(deck_name)
+        
+        if deck is None:
+            raise ValueError(f'invalid deck name: "{deck_name}"')
+        
         dct = dict(id=utils.getid(self.conn, 'card'), front=front, back=back,
                    deck=deck, due=utils.today(), last_interval=None,
                    EF=2.5, conn=self.conn)
-        
         card = Card(**dct)
 
         ##################################################
@@ -240,8 +243,8 @@ class Collection:
         
         # dct contains almost all attributes needed for inserting
         # a row into the database, except deck_id
-        dct['deck_id'] = deck.id
         
+        dct['deck_id'] = deck.id        
         card.conn.execute("""
             INSERT INTO card (id, front, back, deck_id, due, last_interval, EF)
             VALUES (:id, :front, :back, :deck_id, :due, :last_interval, :EF)""",

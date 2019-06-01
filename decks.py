@@ -37,10 +37,10 @@ class Deck:
 
     @property
     def due_cards(self):
-        """Returns a list of all cards which are up for review"""
+        """Returns a list of all cards which are up for review."""
         today = utils.today()
         def is_due(card):
-            card.due <= today
+            return card.due <= today
         return [card for card in self.all_cards if is_due(card)]
 
     @property
