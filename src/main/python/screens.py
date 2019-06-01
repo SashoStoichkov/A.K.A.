@@ -2,7 +2,8 @@ import sys
 import PyQt5 as p
 
 class DeckInfoButton(p.QtWidgets.QWidget):
-    def __init__(self, parent=None):
+    def __init__(self, deckname, parent=None):
+        self.deckname = deckname
         super(DeckInfoButton, self).__init__(parent)
         self.button = p.QtWidgets.QPushButton("Open deck")
         self.button.clicked.connect(self.goToDeckInfo)
@@ -11,7 +12,7 @@ class DeckInfoButton(p.QtWidgets.QWidget):
         lay.setContentsMargins(2, 2, 2, 2)
 
     def goToDeckInfo(self):
-        self.deck_info = DeckInfoScreen()
+        self.deck_info = DeckInfoScreen(self.deckname)
         self.deck_info.show()
 
 class StartScreen(p.QtWidgets.QDialog):
@@ -50,7 +51,7 @@ class StartScreen(p.QtWidgets.QDialog):
 
             self.model.appendRow(item)
 
-            self.list.setIndexWidget(item.index(), DeckInfoButton())
+            self.list.setIndexWidget(item.index(), DeckInfoButton(food))
 
         main_layout = p.QtWidgets.QGridLayout()
         main_layout.addLayout(top_layout, 0, 0, 1, 1)
@@ -60,21 +61,61 @@ class StartScreen(p.QtWidgets.QDialog):
         self.showMaximized()
 
 class DeckInfoScreen(p.QtWidgets.QDialog):
-    def __init__(self, parent=None):
+    def __init__(self, deckname, parent=None):
         super(DeckInfoScreen, self).__init__(parent)
 
         self.originalPalette = p.QtWidgets.QApplication.palette()
         
-        self.setWindowTitle("Deck Info")
+        self.setWindowTitle("{0} Info".format(deckname))
 
-        layoutV = p.QtWidgets.QVBoxLayout()
-        self.pushButton = p.QtWidgets.QPushButton(self)
-        self.pushButton.setText('Back to Start!')
-        self.pushButton.clicked.connect(self.goToStart)
-        layoutV.addWidget(self.pushButton)
+        title = p.QtWidgets.QLabel("{0}".format(deckname))
+        title.setFont(p.QtGui.QFont("Times", 50))
+
+        top_layout = p.QtWidgets.QVBoxLayout()
+        top_layout.addWidget(title)
+
+        studyNowButton = p.QtWidgets.QPushButton(self)
+        studyNowButton.setText('Study Now!')
+        studyNowButton.clicked.connect(self.goToStart)
+        studyNowButton.setMinimumSize(100, 50)
+        top_layout.addWidget(studyNowButton, alignment=p.QtCore.Qt.AlignCenter)
+        top_layout.setContentsMargins(1, 1, 1, 1)
+
+        addCardButton = p.QtWidgets.QPushButton(self)
+        addCardButton.setText('Add Card')
+        addCardButton.clicked.connect(self.goToStart)
+        addCardButton.setMinimumSize(100, 50)
+        top_layout.addWidget(addCardButton, alignment=p.QtCore.Qt.AlignCenter)
+        top_layout.setContentsMargins(1, 1, 1, 1)
+
+        editCardButton = p.QtWidgets.QPushButton(self)
+        editCardButton.setText('Edit Card')
+        editCardButton.clicked.connect(self.goToStart)
+        editCardButton.setMinimumSize(100, 50)
+        top_layout.addWidget(editCardButton, alignment=p.QtCore.Qt.AlignCenter)
+        top_layout.setContentsMargins(1, 1, 1, 1)
+
+        deleteCardButton = p.QtWidgets.QPushButton(self)
+        deleteCardButton.setText('Delete Card')
+        deleteCardButton.clicked.connect(self.goToStart)
+        deleteCardButton.setMinimumSize(100, 50)
+        top_layout.addWidget(deleteCardButton, alignment=p.QtCore.Qt.AlignCenter)
+        top_layout.setContentsMargins(1, 1, 1, 1)
+
+        backToStartButton = p.QtWidgets.QPushButton(self)
+        backToStartButton.setText('Back to Start')
+        backToStartButton.clicked.connect(self.goToStart)
+        backToStartButton.setMinimumSize(100, 50)
+        top_layout.addWidget(backToStartButton, alignment=p.QtCore.Qt.AlignCenter)
+        top_layout.setContentsMargins(1, 1, 1, 1)
+
+        main_layout = p.QtWidgets.QGridLayout()
+        main_layout.addLayout(top_layout, 0, 0, 0, 0)
+
+        self.setLayout(main_layout)
 
         self.showMaximized()
-
+    
     def goToStart(self):
         self.start = StartScreen()
         self.start.show()
