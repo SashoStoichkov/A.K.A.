@@ -24,18 +24,16 @@ class Card:
         self.EF = EF
         self.deck = deck
         self.conn = conn
-
         
     def flush(self):
-        dct = {attr: getattr(self, attr) for attr in ('id', 'front', 'back', 'due', 'last_interval', 'EF')}
-        dct['deck_id'] = self.deck.id
-        
         query = """
             UPDATE Card SET EF=:EF, front=:front, back=:back, due=:due,
                             last_interval=:last_interval, deck_id=:deck_id
             WHERE id = :id;
         """
-
+        dct = dict(id=self.id, front=self.front, back=self.back,
+                   due=self.due, last_interval=self.last_interval,
+                   EF=self.EF, deck_id=self.deck.id)
         self.conn.execute(query, dct)
         self.conn.commit()
 

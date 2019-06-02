@@ -41,8 +41,13 @@ class Deck:
         self.subdecks.remove(subdecks) # may raise ValueError
         
     def flush(self):
-        # possibly useful for renaming decks
-        raise NotImplementedError
+        query = """UPDATE TABLE deck SET name = :name, parent_id = :parent_id
+                   WHERE id = :id;
+        """
+        dct = dict(id=self.id, name=self.name,
+                   parent_id=None if self.parent is None else self.parent.id)
+        self.conn.execute(query, dct)
+        self.conn.commit()
 
     @property
     def due_cards(self):
