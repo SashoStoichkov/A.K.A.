@@ -16,7 +16,7 @@ class DeckInfoButton(p.QtWidgets.QWidget):
         self.deck_info.show()
 
 class StartScreen(p.QtWidgets.QDialog):
-    def __init__(self, parent=None):
+    def __init__(self, coll, parent=None):
         super(StartScreen, self).__init__(parent)
 
         self.originalPalette = p.QtWidgets.QApplication.palette()
@@ -280,3 +280,4 @@ class CardsOptionsScreen(p.QtWidgets.QDialog):
             print("Deleted!")
         else:
             print("You keep it... for now!")
+            
