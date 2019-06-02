@@ -30,7 +30,16 @@ class Deck:
     def add_card(self, card):
         # adds a card to the deck's collection of cards
         self.cards[card.id] = card
-                
+
+    def add_subdeck(self, subdeck):
+        self.subdecks.append(subdeck)
+
+    def remove_subdeck(self, subdeck):
+        """If @subdeck is a subdeck of @self, removes it from @self's subdecks. Otherwise,
+        a ValueError is raised."""
+        
+        self.subdecks.remove(subdecks) # may raise ValueError
+        
     def flush(self):
         # possibly useful for renaming decks
         raise NotImplementedError
@@ -86,11 +95,11 @@ class Deck:
                 return subdeck
             return None
         
-        for attr, value in kwargs:
+        for attr, value in kwargs.items():
             subdeck = check_attr(attr, value)
             if subdeck is not None:
                 return subdeck
 
-        raise ValueError(f'no subdeck with any of the attributes: {kwargs.keys()}')
+        raise ValueError(f'no subdeck with any of the attributes: {kwargs}')
        
         

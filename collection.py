@@ -18,9 +18,7 @@ class Loader:
         query ="""\
             SELECT * FROM Deck;
         """
-        
         cursor = self.conn.execute(query)
-
         data = cursor.fetchall()
         self.conn.commit()
         return data
@@ -37,7 +35,6 @@ class Loader:
             		ON Card.deck_id = Deck.id
             WHERE Deck.id = ?;
         """
-
         cursor = self.conn.execute(query, (deck_id, ))
         cards = cursor.fetchall()
         self.conn.commit()
@@ -46,7 +43,7 @@ class Loader:
     def load(self):
         # creates the Collection determined by the database at self.conn
         def create():
-            roots = []
+            roots = [] # a list of the root decks (those having no parent)
             decks = {} # maps ids to decks            
             deck_rows = self.deck_rows
             for deck_row in deck_rows:
@@ -59,7 +56,7 @@ class Loader:
                 elif parent_id in decks:
                     parent = decks[parent_id]
                     deck = Deck(id=id, name=name, conn=self.conn, parent=parent)
-                    parent.subdecks[name] = deck
+                    parent.add_subdeck(deck)
                     decks[id] = deck
             return roots, decks
         
@@ -77,7 +74,6 @@ class Loader:
         deck_table = {deck.name: deck for deck in roots}
         return Collection(self.conn, deck_table)
 
-deck.subdecks = [<deck1>]
     
 class Collection:
     """
@@ -135,7 +131,7 @@ class Collection:
         ni = 1 # name index
         while ni < len(names):
             name = names[ni]
-            subdeck = deck.subdecks.get(name)
+            subdeck = deck.get_subdeck(name=name)
             if subdeck is None:
                 return (deck, names[ni:])
             else:
@@ -175,7 +171,7 @@ class Collection:
             parent_id = None
         else:
             parent_id = parent.id
-            parent.subdecks[name] = deck
+            parent.add_subdeck(deck)
             
         parent_id = None if parent is None else parent.id
         deck.conn.execute('INSERT INTO deck(id, name, parent_id) VALUES (?, ?, ?)',
@@ -204,7 +200,7 @@ class Collection:
             # deck is a top-level deck
             del self.decks[deck.name]
         else:
-            del parent.subdecks[deck.name]
+            parent.remove_subdeck(deck)
             
         for subdeck in deck.subdecks_iter:
             # remove cards from the db
@@ -224,7 +220,7 @@ class Collection:
         if deck is None:
             return None
         for name in names[1:]:
-            deck = deck.subdecks.get(name)            
+            deck = deck.get_subdeck(name=name)
             if deck is None:
                 return None
         return deck                
@@ -260,7 +256,3 @@ class Collection:
         del deck.cards[card.id]
         card.conn.execute('DELETE FROM card WHERE id = ?', (card.id,))
         card.conn.commit()
-
-loader = Loader(const.DB_NAME)
-col = loader.load()
-pld = col.decks['prog-langs']
