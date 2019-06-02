@@ -81,16 +81,16 @@ class Collection:
         self.conn = conn
         self.main_deck = main_deck
         
-    def create_decks(self, name):
+    def create_decks(self, dotted_name):
         """
-        @name is a string which contains deck names separated by ::
-        Already existing decks are not created. For example, if @name ==
+        @dotted_name must a dotted name. If it is not valid, a ValueError is raised.
+        Already existing decks are not created. For example, if @dotted_name ==
         'english::vocabulary::animals' and the deck 'english' already exists, only the
         decks 'vocabulary' and 'animals' will be created. The deck 'vocabulary' will
         become a subdeck of 'english' and 'animals' will become a subdeck of 'vocabulary'.
         """
         
-        names = name.split('::')
+        names = utils.validate_dotted_name(dotted_name)        
         division = self._divide(names)
         
         if division is None:
@@ -157,17 +157,15 @@ class Collection:
         Creates the deck instance and writes it to the database
         """
         deck = Deck(id=utils.getid(self.conn, 'deck'), name=name,
-                    conn=self.conn, parent=parent)
-        
+                    conn=self.conn, parent=parent)        
         parent.add_subdeck(deck)
         parent_id = parent.id
         deck.conn.execute('INSERT INTO deck(id, name, parent_id) VALUES (?, ?, ?)',
                           (deck.id, deck.name, parent_id))
         deck.conn.commit()
         return deck
-
     
-    def remove_deck(self, deck_name):
+    def remove_deck(self, dotted_name):
         """
         @deck_name can be a top-level name, like 'english', or a dotted name, like
         'english::vocabulary'.  In the latter case, only the innermost deck is removed, so
@@ -177,11 +175,7 @@ class Collection:
         collection and from the database.
         """
 
-        deck = self._find_deck(deck_name)
-        
-        if deck is None:
-            raise ValueError(f'invalid deck name: "{deck_name}"')
-        
+        deck = self._find_deck(dotted_name)        
         parent = deck.parent
         parent.remove_subdeck(deck)
             
@@ -193,25 +187,22 @@ class Collection:
             
         self.conn.commit()
 
-    def _find_deck(self, deck_name):
+    def _find_deck(self, dotted_name):
         """
-        Accepts a dotted name deck_name and returns the corresponding deck. If no such
+        Accepts a dotted name dotted_name and returns the corresponding deck. If no such
         deck exists, None is returned.
         """        
-        names = deck_name.split('::')
+        names = utils.validate_dotted_name(dotted_name)
         deck = self.main_deck
         for name in names:
             deck = deck.get_subdeck(name=name)
             if deck is None:
-                return None
-        return deck       
+                raise ValueError(f'the dotted name "{dotted_name}" does not correspond '
+                                 'to a deck in the collection')
+        return deck
         
-    def create_card(self, front, back, deck_name):
-        deck = self._find_deck(deck_name)
-        
-        if deck is None:
-            raise ValueError(f'invalid deck name: "{deck_name}"')
-        
+    def create_card(self, front, back, dotted_name):
+        deck = self._find_deck(dotted_name)        
         dct = dict(id=utils.getid(self.conn, 'card'), front=front, back=back,
                    deck=deck, due=utils.today(), last_interval=None,
                    EF=2.5, conn=self.conn)
