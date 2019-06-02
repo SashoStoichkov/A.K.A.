@@ -233,3 +233,7 @@ class Collection:
         del deck.cards[card.id]
         card.conn.execute('DELETE FROM card WHERE id = ?', (card.id,))
         card.conn.commit()
+
+# loader = Loader(const.DB_NAME)
+# col = loader.load()
+

@@ -12,7 +12,7 @@ def getid(conn, table):
 def validate_dotted_name(name):
     """If @name is not a valid dotted name, a ValueError is
     raised. Otherwise, a list of the names is returned"""
-    names = name.split()
+    names = name.split('::')
     for name in names:
         if not name:
             raise ValueError(f'Invalid dotted name: "{name}"')
