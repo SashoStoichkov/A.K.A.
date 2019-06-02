@@ -80,7 +80,7 @@ class Deck:
             for deep_subdeck in child.subdecks_iter:
                 yield deep_subdeck
         yield self
-
+        
     def get_subdeck(self, **kwargs):
         """Allows you to get a deck having a given property (for example, a deck having a
         given name or a deck having a given id). Passing in non-existing attributes is
