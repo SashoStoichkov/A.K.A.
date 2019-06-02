@@ -13,7 +13,7 @@ class Deck:
       as the connection between the instance and the database.
     - self.name
     - self.parent: the parent deck. None if the current deck is a root.
-    - self.subdecks: a dict which maps names to decks (with the same name)
+    - self.subdecks: a list of the subdecks of the deck
     - self.cards: a dict which maps card ids to cards
     - self.conn: a connection to the database which contains the
       persistent storage of the deck
@@ -23,24 +23,33 @@ class Deck:
         self.id = id
         self.name = name
         self.parent = parent
-        self.subdecks = {}
+        self.subdecks = []
         self.cards = {}
         self.conn = conn
                     
     def add_card(self, card):
         # adds a card to the deck's collection of cards
         self.cards[card.id] = card
-                
+
+    def add_subdeck(self, subdeck):
+        self.subdecks.append(subdeck)
+
+    def remove_subdeck(self, subdeck):
+        """If @subdeck is a subdeck of @self, removes it from @self's subdecks. Otherwise,
+        a ValueError is raised."""
+        
+        self.subdecks.remove(subdecks) # may raise ValueError
+        
     def flush(self):
         # possibly useful for renaming decks
         raise NotImplementedError
 
     @property
     def due_cards(self):
-        """Returns a list of all cards which are up for review"""
+        """Returns a list of all cards which are up for review."""
         today = utils.today()
         def is_due(card):
-            card.due <= today
+            return card.due <= today
         return [card for card in self.all_cards if is_due(card)]
 
     @property
@@ -57,7 +66,7 @@ class Deck:
         deck's subdecks). The order of the cards is not specified."""
         for card in self.cards.values():
             yield card
-        for subdeck in self.subdecks.values():
+        for subdeck in self.subdecks:
             for card in subdeck._cards_iter:
                 yield card
 
@@ -67,9 +76,28 @@ class Deck:
         subdecks of @self. Using this iterator, a child is always
         yielded before it's parent."""
         
-        for child in self.subdecks.values():
+        for child in self.subdecks:
             for deep_subdeck in child.subdecks_iter:
                 yield deep_subdeck
         yield self
         
+    def get_subdeck(self, **kwargs):
+        """Allows you to get a deck having a given property (for example, a deck having a
+        given name or a deck having a given id). Passing in non-existing attributes is
+        harmless. If no subdeck is found, returns None."""
+
+        def check_attr(attr, value):
+            sentinel = object()
+            for subdeck in self.subdecks:
+                subdeck_val = getattr(subdeck, attr, sentinel)
+                if subdeck_val is sentinel or subdeck_val != value:
+                    continue
+                return subdeck
+            return None
         
+        for attr, value in kwargs.items():
+            subdeck = check_attr(attr, value)
+            if subdeck is not None:
+                return subdeck
+
+        return None

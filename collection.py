@@ -18,9 +18,7 @@ class Loader:
         query ="""\
             SELECT * FROM Deck;
         """
-        
         cursor = self.conn.execute(query)
-
         data = cursor.fetchall()
         self.conn.commit()
         return data
@@ -37,7 +35,6 @@ class Loader:
             		ON Card.deck_id = Deck.id
             WHERE Deck.id = ?;
         """
-
         cursor = self.conn.execute(query, (deck_id, ))
         cards = cursor.fetchall()
         self.conn.commit()
@@ -46,22 +43,16 @@ class Loader:
     def load(self):
         # creates the Collection determined by the database at self.conn
         def create():
-            roots = []
-            decks = {} # maps ids to decks            
-            deck_rows = self.deck_rows
-            for deck_row in deck_rows:
+            main_deck = Deck(id=const.MAIN_DECK_ID, name='main',
+                             conn=self.conn, parent=None)
+            decks = {main_deck.id: main_deck} # maps ids to decks
+            for deck_row in self.deck_rows[1:]: # skip main deck row
                 id, name, parent_id = deck_row
-                if parent_id is None:
-                    # the row represents a root deck
-                    deck = Deck(id=id, name=name, conn=self.conn, parent=None)
-                    decks[id] = deck
-                    roots.append(deck)
-                elif parent_id in decks:
-                    parent = decks[parent_id]
-                    deck = Deck(id=id, name=name, conn=self.conn, parent=parent)
-                    parent.subdecks[name] = deck
-                    decks[id] = deck
-            return roots, decks
+                parent = decks[parent_id]
+                deck = Deck(id=id, name=name, conn=self.conn, parent=parent)
+                parent.add_subdeck(deck)
+                decks[id] = deck
+            return main_deck, decks
         
         def populate(created_decks):
             for deck_id, deck in created_decks.items():
@@ -72,23 +63,23 @@ class Loader:
                                         last_interval=last_interval, conn=self.conn)))
             return created_decks
         
-        roots, decks = create()
+        main_deck, decks = create()
         populate(decks)
-        deck_table = {deck.name: deck for deck in roots}
-        return Collection(self.conn, deck_table)
+        return Collection(self.conn, main_deck)
 
+    
 class Collection:
     """
     Collections are factories for decks and cards
 
     * attributes:
     - conn: the connection to the database containing the collection
-    - decks: a dict of the form {<name>: <deck>}
+    - main_deck: a dict of the form {<name>: <deck>}
     """
 
-    def __init__(self, conn, decks):
+    def __init__(self, conn, main_deck):
         self.conn = conn
-        self.decks = decks
+        self.main_deck = main_deck
         
     def create_decks(self, name):
         """
@@ -101,15 +92,13 @@ class Collection:
         
         names = name.split('::')
         division = self._divide(names)
+        
         if division is None:
             # all names exist
             return
-        deck, names = division
-        if deck is None:
-            # create a top level deck
-            self.decks[names[0]] = self._create_deck_path(names, parent=None)
-        else:
-            self._create_deck_path(names, parent=deck)
+        
+        parent, names = division
+        self._create_deck_path(names, parent)
 
     def _divide(self, names):
         """
@@ -127,13 +116,14 @@ class Collection:
         
         if not names:
             return None
-        deck = self.decks.get(names[0])
-        if not deck:
-            return (None, names)
-        ni = 1 # name index
+        
+        deck = self.main_deck
+        ni = 0 # name index
+        
         while ni < len(names):
             name = names[ni]
-            subdeck = deck.subdecks.get(name)
+            subdeck = deck.get_subdeck(name=name)
+            
             if subdeck is None:
                 return (deck, names[ni:])
             else:
@@ -141,13 +131,13 @@ class Collection:
                 ni += 1
         else:
             # names are exhausted and all decks exist
-            return None            
-                    
+            return None  
+
     def _create_deck_path(self, names, parent):
         """
         Just a utility for self.create_decks.
         @names must be a non-empty list of deck names.
-        @parent must be a deck or None.
+        @parent must be a deck.
         This function creates a deck for each name, with names[-1] being a child of
         names[-2] being a child of names[-3] and so on. The deck determined by names[0]
         will have @parent as a parent. This function returns the deck associated with
@@ -169,17 +159,13 @@ class Collection:
         deck = Deck(id=utils.getid(self.conn, 'deck'), name=name,
                     conn=self.conn, parent=parent)
         
-        if parent is None:
-            parent_id = None
-        else:
-            parent_id = parent.id
-            parent.subdecks[name] = deck
-            
-        parent_id = None if parent is None else parent.id
+        parent.add_subdeck(deck)
+        parent_id = parent.id
         deck.conn.execute('INSERT INTO deck(id, name, parent_id) VALUES (?, ?, ?)',
                           (deck.id, deck.name, parent_id))
         deck.conn.commit()
         return deck
+
     
     def remove_deck(self, deck_name):
         """
@@ -197,12 +183,7 @@ class Collection:
             raise ValueError(f'invalid deck name: "{deck_name}"')
         
         parent = deck.parent
-        
-        if parent is None:
-            # deck is a top-level deck
-            del self.decks[deck.name]
-        else:
-            del parent.subdecks[deck.name]
+        parent.remove_subdeck(deck)
             
         for subdeck in deck.subdecks_iter:
             # remove cards from the db
@@ -218,21 +199,22 @@ class Collection:
         deck exists, None is returned.
         """        
         names = deck_name.split('::')
-        deck = self.decks.get(names[0])        
-        if deck is None:
-            return None
-        for name in names[1:]:
-            deck = deck.subdecks.get(name)            
+        deck = self.main_deck
+        for name in names:
+            deck = deck.get_subdeck(name=name)
             if deck is None:
                 return None
-        return deck                
+        return deck       
         
     def create_card(self, front, back, deck_name):
         deck = self._find_deck(deck_name)
+        
+        if deck is None:
+            raise ValueError(f'invalid deck name: "{deck_name}"')
+        
         dct = dict(id=utils.getid(self.conn, 'card'), front=front, back=back,
                    deck=deck, due=utils.today(), last_interval=None,
                    EF=2.5, conn=self.conn)
-        
         card = Card(**dct)
 
         ##################################################
@@ -240,8 +222,8 @@ class Collection:
         
         # dct contains almost all attributes needed for inserting
         # a row into the database, except deck_id
-        dct['deck_id'] = deck.id
         
+        dct['deck_id'] = deck.id        
         card.conn.execute("""
             INSERT INTO card (id, front, back, deck_id, due, last_interval, EF)
             VALUES (:id, :front, :back, :deck_id, :due, :last_interval, :EF)""",
@@ -255,7 +237,3 @@ class Collection:
         del deck.cards[card.id]
         card.conn.execute('DELETE FROM card WHERE id = ?', (card.id,))
         card.conn.commit()
-
-loader = Loader(const.DB_NAME)
-col = loader.load()
-pld = col.decks['prog-langs']

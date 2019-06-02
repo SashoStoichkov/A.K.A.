@@ -5,6 +5,6 @@ import screens
 
 if __name__ == "__main__":
     app = ApplicationContext()
-    s = screens.StartScreen()
+    s = screens.CardsScreen("Pesho")
     s.show()
     sys.exit(app.app.exec_())

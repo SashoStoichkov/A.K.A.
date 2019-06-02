@@ -1,3 +1,5 @@
+MAIN_DECK_ID = 0
+
 DB_NAME = 'dummy.db'
 
 STUB_NAME = "stub.db"
@@ -29,9 +31,10 @@ CREATE TABLE IF NOT EXISTS Card(
     FOREIGN KEY(deck_id) REFERENCES Deck(id)
 );
 
-INSERT INTO deck (name, parent_id) VALUES ('prog-langs', NULL);
-INSERT INTO deck (name, parent_id) VALUES ('Python', 1);
-INSERT INTO deck (name, parent_id) VALUES ('C', 1);
+INSERT INTO deck VALUES (0, 'main', NULL);
+INSERT INTO deck VALUES (1, 'prog-langs', 0);
+INSERT INTO deck VALUES (2, 'Python', 1);
+INSERT INTO deck VALUES (3, 'C', 1);
 
 INSERT INTO card (front, back, ef, due, last_interval, deck_id) VALUES
 ('general question 1', 'general answer 1', 2.5, 12345, 6, 1);

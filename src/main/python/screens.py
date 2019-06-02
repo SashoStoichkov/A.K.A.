@@ -88,19 +88,19 @@ class DeckInfoScreen(p.QtWidgets.QDialog):
         top_layout.addWidget(addCardButton, alignment=p.QtCore.Qt.AlignCenter)
         top_layout.setContentsMargins(1, 1, 1, 1)
 
-        editCardButton = p.QtWidgets.QPushButton(self)
-        editCardButton.setText('Edit Card')
-        editCardButton.clicked.connect(self.goToStart)
-        editCardButton.setMinimumSize(100, 50)
-        top_layout.addWidget(editCardButton, alignment=p.QtCore.Qt.AlignCenter)
-        top_layout.setContentsMargins(1, 1, 1, 1)
+        # editCardButton = p.QtWidgets.QPushButton(self)
+        # editCardButton.setText('Edit Card')
+        # editCardButton.clicked.connect(self.goToStart)
+        # editCardButton.setMinimumSize(100, 50)
+        # top_layout.addWidget(editCardButton, alignment=p.QtCore.Qt.AlignCenter)
+        # top_layout.setContentsMargins(1, 1, 1, 1)
 
-        deleteCardButton = p.QtWidgets.QPushButton(self)
-        deleteCardButton.setText('Delete Card')
-        deleteCardButton.clicked.connect(self.deleteCard)
-        deleteCardButton.setMinimumSize(100, 50)
-        top_layout.addWidget(deleteCardButton, alignment=p.QtCore.Qt.AlignCenter)
-        top_layout.setContentsMargins(1, 1, 1, 1)
+        # deleteCardButton = p.QtWidgets.QPushButton(self)
+        # deleteCardButton.setText('Delete Card')
+        # deleteCardButton.clicked.connect(self.deleteCard)
+        # deleteCardButton.setMinimumSize(100, 50)
+        # top_layout.addWidget(deleteCardButton, alignment=p.QtCore.Qt.AlignCenter)
+        # top_layout.setContentsMargins(1, 1, 1, 1)
 
         backToStartButton = p.QtWidgets.QPushButton(self)
         backToStartButton.setText('Back to Start')
@@ -127,6 +127,20 @@ class DeckInfoScreen(p.QtWidgets.QDialog):
             print("Deleted!")
         else:
             print("You keep it... for now!")
+
+class CardInfoButton(p.QtWidgets.QWidget):
+    def __init__(self, deckname, parent=None):
+        self.deckname = deckname
+        super(CardInfoButton, self).__init__(parent)
+        self.button = p.QtWidgets.QPushButton("Options")
+        self.button.clicked.connect(self.goToDeckInfo)
+        lay = p.QtWidgets.QHBoxLayout(self)
+        lay.addWidget(self.button, alignment=p.QtCore.Qt.AlignRight)
+        lay.setContentsMargins(2, 2, 2, 2)
+
+    def goToDeckInfo(self):
+        self.deck_info = DeckInfoScreen(self.deckname)
+        self.deck_info.show()
 
 class CardsScreen(p.QtWidgets.QDialog):
     def __init__(self, deckname, parent=None):
@@ -164,7 +178,7 @@ class CardsScreen(p.QtWidgets.QDialog):
 
             self.model.appendRow(item)
 
-            self.list.setIndexWidget(item.index(), DeckInfoButton(food))
+            self.list.setIndexWidget(item.index(), CardInfoButton(food))
 
         main_layout = p.QtWidgets.QGridLayout()
         main_layout.addLayout(top_layout, 0, 0, 1, 1)

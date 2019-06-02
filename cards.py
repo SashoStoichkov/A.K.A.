@@ -24,7 +24,8 @@ class Card:
         self.EF = EF
         self.deck = deck
         self.conn = conn
-                
+
+        
     def flush(self):
         dct = {attr: getattr(self, attr) for attr in ('id', 'front', 'back', 'due', 'last_interval', 'EF')}
         dct['deck_id'] = self.deck.id
@@ -41,7 +42,7 @@ class Card:
 
     def reschedule(self, ans):
         # ans is an int such that 0 <= ans <= 5
-        self.EF = max(1.3, min(2.5, self.EF-0.8+0.28*q-0.02*q*q))
+        self.EF = max(1.3, min(2.5, self.EF - 0.8 + 0.28 * ans - 0.02 * ans * ans))
         if ans < 3:
             self.last_interval = None
             self.due = utils.today() + 1
