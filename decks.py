@@ -84,7 +84,7 @@ class Deck:
     def get_subdeck(self, **kwargs):
         """Allows you to get a deck having a given property (for example, a deck having a
         given name or a deck having a given id). Passing in non-existing attributes is
-        harmless."""
+        harmless. If no subdeck is found, returns None."""
 
         def check_attr(attr, value):
             sentinel = object()
@@ -100,6 +100,4 @@ class Deck:
             if subdeck is not None:
                 return subdeck
 
-        raise ValueError(f'no subdeck with any of the attributes: {kwargs}')
-       
-        
+        return None

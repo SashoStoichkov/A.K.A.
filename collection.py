@@ -43,22 +43,16 @@ class Loader:
     def load(self):
         # creates the Collection determined by the database at self.conn
         def create():
-            roots = [] # a list of the root decks (those having no parent)
-            decks = {} # maps ids to decks            
-            deck_rows = self.deck_rows
-            for deck_row in deck_rows:
+            main_deck = Deck(id=const.MAIN_DECK_ID, name='main',
+                             conn=self.conn, parent=None)
+            decks = {main_deck.id: main_deck} # maps ids to decks
+            for deck_row in self.deck_rows[1:]: # skip main deck row
                 id, name, parent_id = deck_row
-                if parent_id is None:
-                    # the row represents a root deck
-                    deck = Deck(id=id, name=name, conn=self.conn, parent=None)
-                    decks[id] = deck
-                    roots.append(deck)
-                elif parent_id in decks:
-                    parent = decks[parent_id]
-                    deck = Deck(id=id, name=name, conn=self.conn, parent=parent)
-                    parent.add_subdeck(deck)
-                    decks[id] = deck
-            return roots, decks
+                parent = decks[parent_id]
+                deck = Deck(id=id, name=name, conn=self.conn, parent=parent)
+                parent.add_subdeck(deck)
+                decks[id] = deck
+            return main_deck, decks
         
         def populate(created_decks):
             for deck_id, deck in created_decks.items():
@@ -69,10 +63,9 @@ class Loader:
                                         last_interval=last_interval, conn=self.conn)))
             return created_decks
         
-        roots, decks = create()
+        main_deck, decks = create()
         populate(decks)
-        deck_table = {deck.name: deck for deck in roots}
-        return Collection(self.conn, deck_table)
+        return Collection(self.conn, main_deck)
 
     
 class Collection:
@@ -84,9 +77,9 @@ class Collection:
     - decks: a dict of the form {<name>: <deck>}
     """
 
-    def __init__(self, conn, decks):
+    def __init__(self, conn, main_deck):
         self.conn = conn
-        self.decks = decks
+        self.main_deck = main_deck
         
     def create_decks(self, name):
         """
@@ -99,15 +92,13 @@ class Collection:
         
         names = name.split('::')
         division = self._divide(names)
+        
         if division is None:
             # all names exist
             return
-        deck, names = division
-        if deck is None:
-            # create a top level deck
-            self.decks[names[0]] = self._create_deck_path(names, parent=None)
-        else:
-            self._create_deck_path(names, parent=deck)
+        
+        parent, names = division
+        self._create_deck_path(names, parent)
 
     def _divide(self, names):
         """
@@ -125,13 +116,14 @@ class Collection:
         
         if not names:
             return None
-        deck = self.decks.get(names[0])
-        if not deck:
-            return (None, names)
-        ni = 1 # name index
+        
+        deck = self.main_deck
+        ni = 0 # name index
+        
         while ni < len(names):
             name = names[ni]
             subdeck = deck.get_subdeck(name=name)
+            
             if subdeck is None:
                 return (deck, names[ni:])
             else:
@@ -139,13 +131,13 @@ class Collection:
                 ni += 1
         else:
             # names are exhausted and all decks exist
-            return None            
+            return None  
 
     def _create_deck_path(self, names, parent):
         """
         Just a utility for self.create_decks.
         @names must be a non-empty list of deck names.
-        @parent must be a deck or None.
+        @parent must be a deck.
         This function creates a deck for each name, with names[-1] being a child of
         names[-2] being a child of names[-3] and so on. The deck determined by names[0]
         will have @parent as a parent. This function returns the deck associated with
@@ -167,13 +159,8 @@ class Collection:
         deck = Deck(id=utils.getid(self.conn, 'deck'), name=name,
                     conn=self.conn, parent=parent)
         
-        if parent is None:
-            parent_id = None
-        else:
-            parent_id = parent.id
-            parent.add_subdeck(deck)
-            
-        parent_id = None if parent is None else parent.id
+        parent.add_subdeck(deck)
+        parent_id = parent.id
         deck.conn.execute('INSERT INTO deck(id, name, parent_id) VALUES (?, ?, ?)',
                           (deck.id, deck.name, parent_id))
         deck.conn.commit()
@@ -216,14 +203,12 @@ class Collection:
         deck exists, None is returned.
         """        
         names = deck_name.split('::')
-        deck = self.decks.get(names[0])        
-        if deck is None:
-            return None
-        for name in names[1:]:
+        deck = self.main_deck
+        for name in names:
             deck = deck.get_subdeck(name=name)
             if deck is None:
                 return None
-        return deck                
+        return deck       
         
     def create_card(self, front, back, deck_name):
         deck = self._find_deck(deck_name)
