@@ -1,9 +1,15 @@
 import sys
 import PyQt5 as p
 
+collection = None # set by init
+
+def init(col):
+    global collection
+    collection = col
+
 class DeckInfoButton(p.QtWidgets.QWidget):
-    def __init__(self, deckname, parent=None):
-        self.deckname = deckname
+    def __init__(self, deck, parent=None):
+        self.deck = deck
         super(DeckInfoButton, self).__init__(parent)
         self.button = p.QtWidgets.QPushButton("Open deck")
         self.button.clicked.connect(self.goToDeckInfo)
@@ -12,13 +18,13 @@ class DeckInfoButton(p.QtWidgets.QWidget):
         lay.setContentsMargins(2, 2, 2, 2)
 
     def goToDeckInfo(self):
-        self.deck_info = DeckInfoScreen(self.deckname)
+        self.deck_info = DeckInfoScreen(self.deck)
         self.deck_info.show()
 
 class StartScreen(p.QtWidgets.QDialog):
-    def __init__(self, coll, parent=None):
+    def __init__(self, parent=None):
         super(StartScreen, self).__init__(parent)
-
+        
         self.originalPalette = p.QtWidgets.QApplication.palette()
 
         self.setWindowTitle("Welcome to Auswendiglernen!")
@@ -34,24 +40,17 @@ class StartScreen(p.QtWidgets.QDialog):
         self.model = p.QtGui.QStandardItemModel(self.list)
 
         # dummy data
-        foods = [
-            'Cookie dough', # Must be store-bought
-            'Hummus', # Must be homemade
-            'Spaghetti', # Must be saucy
-            'Dal makhani', # Must be spicy
-            'Chocolate whipped cream' # Must be plentiful
-        ]
-
+        top_decks = collection.top_decks
         self.list.setModel(self.model)
         self.list.setMinimumSize(600, 400)
 
-        for food in foods:
-            item = p.QtGui.QStandardItem(food)
+        for deck in top_decks.values():
+            item = p.QtGui.QStandardItem(deck.name)
             item.setFont(p.QtGui.QFont("Times", 25))
 
             self.model.appendRow(item)
 
-            self.list.setIndexWidget(item.index(), DeckInfoButton(food))
+            self.list.setIndexWidget(item.index(), DeckInfoButton(deck))
 
         main_layout = p.QtWidgets.QGridLayout()
         main_layout.addLayout(top_layout, 0, 0, 1, 1)
@@ -61,14 +60,16 @@ class StartScreen(p.QtWidgets.QDialog):
         self.showMaximized()
 
 class DeckInfoScreen(p.QtWidgets.QDialog):
-    def __init__(self, deckname, parent=None):
+    def __init__(self, deck, parent=None):
         super(DeckInfoScreen, self).__init__(parent)
+        
+        self.deck = deck
 
         self.originalPalette = p.QtWidgets.QApplication.palette()
         
-        self.setWindowTitle("{0} Info".format(deckname))
+        self.setWindowTitle("{0} Info".format(deck.name))
 
-        title = p.QtWidgets.QLabel("{0} Subdecks:".format(deckname))
+        title = p.QtWidgets.QLabel("{0} Subdecks:".format(deck.name))
         title.setFont(p.QtGui.QFont("Times", 50))
 
         top_layout = p.QtWidgets.QVBoxLayout()
@@ -78,25 +79,16 @@ class DeckInfoScreen(p.QtWidgets.QDialog):
         top_layout.addWidget(self.list)
         self.model = p.QtGui.QStandardItemModel(self.list)
 
-        # dummy data
-        foods = [
-            'Cookie dough', # Must be store-bought
-            'Hummus', # Must be homemade
-            'Spaghetti', # Must be saucy
-            'Dal makhani', # Must be spicy
-            'Chocolate whipped cream', # Must be plentiful
-        ]
-
         self.list.setModel(self.model)
         self.list.setMinimumSize(600, 400)
 
-        for food in foods:
-            item = p.QtGui.QStandardItem(food)
+        for subdeck in self.deck.subdecks:
+            item = p.QtGui.QStandardItem(subdeck.name)
             item.setFont(p.QtGui.QFont("Times", 25))
 
             self.model.appendRow(item)
 
-            self.list.setIndexWidget(item.index(), CardInfoButton(food))
+            self.list.setIndexWidget(item.index(), CardInfoButton(subdeck.name))
 
         studyNowButton = p.QtWidgets.QPushButton(self)
         studyNowButton.setText('Study Now!')
@@ -125,8 +117,8 @@ class DeckInfoScreen(p.QtWidgets.QDialog):
 
 class CardInfoButton(p.QtWidgets.QWidget):
     def __init__(self, deckname, parent=None):
-        self.deckname = deckname
         super(CardInfoButton, self).__init__(parent)
+        self.deckname = deckname
         self.button = p.QtWidgets.QPushButton("See Cards")
         self.button.clicked.connect(self.goToCardsInfo)
         lay = p.QtWidgets.QHBoxLayout(self)

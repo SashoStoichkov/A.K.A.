@@ -232,3 +232,13 @@ class Collection:
         del deck.cards[card.id]
         card.conn.execute('DELETE FROM card WHERE id = ?', (card.id,))
         card.conn.commit()
+
+    ############################################################################
+    # Utility functions
+    
+    @property
+    def top_decks(self):
+        """Returns a dict which maps top-level deck names to the decks themselves"""
+        return {deck.name: deck for deck in self.main_deck.subdecks}
+
+    
