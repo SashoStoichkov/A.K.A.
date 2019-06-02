@@ -161,7 +161,7 @@ class CardsScreen(p.QtWidgets.QDialog):
         self.setWindowTitle("{0} Cards".format(deckname))
 
         title = p.QtWidgets.QLabel("{0} Cards:".format(deckname))
-        title.setFont(p.QtGui.QFont("Times", 50))
+        title.setFont(p.QtGui.QFont("Times", 20))
 
         top_layout = p.QtWidgets.QHBoxLayout()
         top_layout.addWidget(title)
@@ -268,9 +268,9 @@ class CardsOptionsScreen(p.QtWidgets.QDialog):
         if okPressed and text != '':
             self.cardname = text
 
-        text, okPressed = p.QtWidgets.QInputDialog.getText(self, "Answer", "Edit Answer:", p.QtWidgets.QLineEdit.Normal, self.cardname_answer)
-        if okPressed and text != '':
-            self.cardname_answer = text
+            text, okPressed = p.QtWidgets.QInputDialog.getText(self, "Answer", "Edit Answer:", p.QtWidgets.QLineEdit.Normal, self.cardname_answer)
+            if okPressed and text != '':
+                self.cardname_answer = text
         
 
     def deleteCard(self):
