@@ -138,8 +138,9 @@ class CardInfoButton(p.QtWidgets.QWidget):
         self.deck_info.show()
 
 class CardOptionsButton(p.QtWidgets.QWidget):
-    def __init__(self, cardname, parent=None):
+    def __init__(self, cardname, cardname_answer, parent=None):
         self.cardname = cardname
+        self.cardname_answer = cardname_answer
         super(CardOptionsButton, self).__init__(parent)
         self.button = p.QtWidgets.QPushButton("Options")
         self.button.clicked.connect(self.goToCardsOptions)
@@ -148,7 +149,7 @@ class CardOptionsButton(p.QtWidgets.QWidget):
         lay.setContentsMargins(2, 2, 2, 2)
 
     def goToCardsOptions(self):
-        self.deck_info = CardsOptionsScreen(self.cardname)
+        self.deck_info = CardsOptionsScreen(self.cardname, self.cardname_answer)
         self.deck_info.show()
 
 class CardsScreen(p.QtWidgets.QDialog):
@@ -187,11 +188,11 @@ class CardsScreen(p.QtWidgets.QDialog):
 
             self.model.appendRow(item)
 
-            self.list.setIndexWidget(item.index(), CardOptionsButton(food))
+            self.list.setIndexWidget(item.index(), CardOptionsButton(food, food))
 
         addCardButton = p.QtWidgets.QPushButton(self)
         addCardButton.setText('Add Card')
-        addCardButton.clicked.connect(self.goToStart)
+        addCardButton.clicked.connect(self.addCard)
         addCardButton.setMinimumSize(100, 50)
         top_layout.addWidget(addCardButton, alignment=p.QtCore.Qt.AlignCenter)
         top_layout.setContentsMargins(1, 1, 1, 1)
@@ -207,18 +208,30 @@ class CardsScreen(p.QtWidgets.QDialog):
         self.start = StartScreen()
         self.start.show()
 
+    def addCard(self):
+        text, okPressed = p.QtWidgets.QInputDialog.getText(self, "Question", "Add Question:", p.QtWidgets.QLineEdit.Normal, "")
+        if okPressed and text != '':
+            print(text)
+
+        text, okPressed = p.QtWidgets.QInputDialog.getText(self, "Answer", "Add Answer:", p.QtWidgets.QLineEdit.Normal, "")
+        if okPressed and text != '':
+            print(text)
+
 class CardsOptionsScreen(p.QtWidgets.QDialog):
-    def __init__(self, cardname, parent=None):
+    def __init__(self, cardname, cardname_answer, parent=None):
         super(CardsOptionsScreen, self).__init__(parent)
 
         self.originalPalette = p.QtWidgets.QApplication.palette()
+
+        self.cardname = cardname
+        self.cardname_answer = cardname + " answer"
 
         self.setWindowTitle("{0} Options".format(cardname))
 
         question = p.QtWidgets.QLabel("Question: {0}".format(cardname))
         question.setFont(p.QtGui.QFont("Times", 50))
 
-        answer = p.QtWidgets.QLabel("Answer: {0}".format(cardname))
+        answer = p.QtWidgets.QLabel("Answer: {0}".format(cardname_answer))
         answer.setFont(p.QtGui.QFont("Times", 50))
 
         top_layout = p.QtWidgets.QVBoxLayout()
@@ -227,7 +240,7 @@ class CardsOptionsScreen(p.QtWidgets.QDialog):
 
         editCardButton = p.QtWidgets.QPushButton(self)
         editCardButton.setText('Edit Card')
-        editCardButton.clicked.connect(self.goToStart)
+        editCardButton.clicked.connect(self.editCard)
         editCardButton.setMinimumSize(100, 50)
         top_layout.addWidget(editCardButton, alignment=p.QtCore.Qt.AlignCenter)
         top_layout.setContentsMargins(1, 1, 1, 1)
@@ -249,6 +262,16 @@ class CardsOptionsScreen(p.QtWidgets.QDialog):
     def goToStart(self):
         self.start = StartScreen()
         self.start.show()
+
+    def editCard(self):
+        text, okPressed = p.QtWidgets.QInputDialog.getText(self, "Question", "Edit Question:", p.QtWidgets.QLineEdit.Normal, self.cardname)
+        if okPressed and text != '':
+            self.cardname = text
+
+        text, okPressed = p.QtWidgets.QInputDialog.getText(self, "Answer", "Edit Answer:", p.QtWidgets.QLineEdit.Normal, self.cardname_answer)
+        if okPressed and text != '':
+            self.cardname_answer = text
+        
 
     def deleteCard(self):
         self.choice = p.QtWidgets.QMessageBox.question(self, "Delete Card!", "Are you sure you want to delete a Card?", p.QtWidgets.QMessageBox.Yes | p.QtWidgets.QMessageBox.No)
