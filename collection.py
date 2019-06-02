@@ -12,10 +12,10 @@ class Loader:
 
     @property
     def deck_rows(self):
-        # just a utility function
-        # returns a list of rows (<deck-id>, <deck-name>, <deck-parent-id>)
+        """just a utility function.
+        returns a list of rows (<deck-id>, <deck-name>, <deck-parent-id>)"""
         
-        query ="""\
+        query ="""
             SELECT * FROM Deck;
         """
         cursor = self.conn.execute(query)
@@ -25,11 +25,11 @@ class Loader:
 
     
     def card_rows(self, deck_id):
-        # just a utility function
-        # returns a list of card rows, which have the form
-        # (id, EF, front, back, due_time, last_interval)
+        """just a utility function
+        returns a list of card rows, which have the form
+        (id, EF, front, back, due_time, last_interval)"""
         
-        query = """\
+        query = """
             SELECT Card.id, EF, front, back, due, last_interval FROM Card
             	INNER JOIN Deck
             		ON Card.deck_id = Deck.id
@@ -41,7 +41,8 @@ class Loader:
         return cards
 
     def load(self):
-        # creates the Collection determined by the database at self.conn
+        """creates the Collection determined by the database at self.conn"""
+        
         def create():
             main_deck = Deck(id=const.MAIN_DECK_ID, name='main',
                              conn=self.conn, parent=None)
@@ -70,11 +71,9 @@ class Loader:
     
 class Collection:
     """
-    Collections are factories for decks and cards
-
     * attributes:
     - conn: the connection to the database containing the collection
-    - main_deck: a dict of the form {<name>: <deck>}
+    - main_deck
     """
 
     def __init__(self, conn, main_deck):
@@ -83,7 +82,7 @@ class Collection:
         
     def create_decks(self, dotted_name):
         """
-        @dotted_name must a dotted name. If it is not valid, a ValueError is raised.
+        @dotted_name must a dotted name. If it is not valid, an error is raised.
         Already existing decks are not created. For example, if @dotted_name ==
         'english::vocabulary::animals' and the deck 'english' already exists, only the
         decks 'vocabulary' and 'animals' will be created. The deck 'vocabulary' will
@@ -143,6 +142,7 @@ class Collection:
         will have @parent as a parent. This function returns the deck associated with
         names[0]
         """
+        
         result = None
         for name in names:
             deck = self._create_deck(name, parent)
@@ -156,6 +156,7 @@ class Collection:
         Just a utility for self._create_deck_path.
         Creates the deck instance and writes it to the database
         """
+        
         deck = Deck(id=utils.getid(self.conn, 'deck'), name=name,
                     conn=self.conn, parent=parent)        
         parent.add_subdeck(deck)
@@ -175,7 +176,7 @@ class Collection:
         collection and from the database.
         """
 
-        deck = self._find_deck(dotted_name)        
+        deck = self.find_deck(dotted_name)        
         parent = deck.parent
         parent.remove_subdeck(deck)
             
@@ -187,11 +188,12 @@ class Collection:
             
         self.conn.commit()
 
-    def _find_deck(self, dotted_name):
+    def find_deck(self, dotted_name):
         """
         Accepts a dotted name dotted_name and returns the corresponding deck. If no such
         deck exists, None is returned.
-        """        
+        """
+        
         names = utils.validate_dotted_name(dotted_name)
         deck = self.main_deck
         for name in names:
@@ -202,7 +204,9 @@ class Collection:
         return deck
         
     def create_card(self, front, back, dotted_name):
-        deck = self._find_deck(dotted_name)        
+        """Creates a card and adds it to the deck at @dotted_name. The card is stored in
+        the database aswell"""
+        deck = self.find_deck(dotted_name)
         dct = dict(id=utils.getid(self.conn, 'card'), front=front, back=back,
                    deck=deck, due=utils.today(), last_interval=None,
                    EF=2.5, conn=self.conn)
@@ -224,6 +228,7 @@ class Collection:
         return card
             
     def remove_card(self, card):
+        """Removes the card @card from it's deck and from the database."""
         deck = card.deck
         del deck.cards[card.id]
         card.conn.execute('DELETE FROM card WHERE id = ?', (card.id,))
