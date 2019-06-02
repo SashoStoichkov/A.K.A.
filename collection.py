@@ -77,6 +77,8 @@ class Loader:
         deck_table = {deck.name: deck for deck in roots}
         return Collection(self.conn, deck_table)
 
+deck.subdecks = [<deck1>]
+    
 class Collection:
     """
     Collections are factories for decks and cards
@@ -142,7 +144,7 @@ class Collection:
         else:
             # names are exhausted and all decks exist
             return None            
-                    
+
     def _create_deck_path(self, names, parent):
         """
         Just a utility for self.create_decks.
