@@ -74,7 +74,7 @@ class Collection:
 
     * attributes:
     - conn: the connection to the database containing the collection
-    - decks: a dict of the form {<name>: <deck>}
+    - main_deck: a dict of the form {<name>: <deck>}
     """
 
     def __init__(self, conn, main_deck):
@@ -182,12 +182,7 @@ class Collection:
             raise ValueError(f'invalid deck name: "{deck_name}"')
         
         parent = deck.parent
-        
-        if parent is None:
-            # deck is a top-level deck
-            del self.decks[deck.name]
-        else:
-            parent.remove_subdeck(deck)
+        parent.remove_subdeck(deck)
             
         for subdeck in deck.subdecks_iter:
             # remove cards from the db
