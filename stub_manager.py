@@ -12,6 +12,14 @@ class StubManager:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.conn.executescript(PURGE_STUB_SCRIPT)
-        #self.conn.close()
+        self.conn.close()
+
+    
+    
+    @staticmethod
+    def purge_stub(conn):
+        conn.executescript(PURGE_STUB_SCRIPT)
+
+
 
 
