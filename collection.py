@@ -199,8 +199,7 @@ class Collection:
         for name in names:
             deck = deck.get_subdeck(name=name)
             if deck is None:
-                raise ValueError(f'the dotted name "{dotted_name}" does not correspond '
-                                 'to a deck in the collection')
+                raise ValueError(f'no deck with the dotted name "{dotted_name}"')
         return deck
         
     def create_card(self, front, back, dotted_name):
@@ -222,7 +221,7 @@ class Collection:
         card.conn.execute("""
             INSERT INTO card (id, front, back, deck_id, due, last_interval, EF)
             VALUES (:id, :front, :back, :deck_id, :due, :last_interval, :EF)""",
-                          dct)        
+                          dct)
         card.conn.commit()
         deck.add_card(card)
         return card
@@ -233,7 +232,3 @@ class Collection:
         del deck.cards[card.id]
         card.conn.execute('DELETE FROM card WHERE id = ?', (card.id,))
         card.conn.commit()
-
-# loader = Loader(const.DB_NAME)
-# col = loader.load()
-

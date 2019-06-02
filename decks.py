@@ -38,7 +38,7 @@ class Deck:
         """If @subdeck is a subdeck of @self, removes it from @self's subdecks. Otherwise,
         a ValueError is raised."""
         
-        self.subdecks.remove(subdecks) # may raise ValueError
+        self.subdecks.remove(subdeck) # may raise ValueError
         
     def flush(self):
         query = """UPDATE TABLE deck SET name = :name, parent_id = :parent_id
