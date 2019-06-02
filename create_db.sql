@@ -33,4 +33,4 @@ INSERT INTO card (front, back, ef, due, last_interval, deck_id) VALUES
 ('Python question 2', 'Python answer 2', 1.5, 6542, 98, 2);
 
 INSERT INTO card (front, back, ef, due, last_interval, deck_id) VALUES
-('C question 1', 'C answer 1', 1.2, 6542, 98, 2);
+('C question 1', 'C answer 1', 1.2, 6542, 98, 3);
