@@ -24,12 +24,13 @@ class Deck:
         self.name = name
         self.parent = parent
         self.subdecks = []
-        self.cards = {}
+        self.cards = []
         self.conn = conn
                     
     def add_card(self, card):
         # adds a card to the deck's collection of cards
-        self.cards[card.id] = card
+        # self.cards[card.id] = card
+        self.cards.append(card)
 
     def add_subdeck(self, subdeck):
         self.subdecks.append(subdeck)

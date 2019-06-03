@@ -7,7 +7,7 @@ import collection
 import const
 
 if __name__ == "__main__":
-    os.chdir('/home/alex/A.K.A./src/main/python')
+    # os.chdir('/home/alex/A.K.A./src/main/python')
     col = collection.Loader(const.DB_NAME).load()
     screens.init(col)
     app = ApplicationContext()

@@ -114,6 +114,7 @@ class DeckInfoScreen(p.QtWidgets.QDialog):
     def goToStart(self):
         self.start = StartScreen()
         self.start.show()
+        self.start.close()
 
 class CardInfoButton(p.QtWidgets.QWidget):
     def __init__(self, deckname, parent=None):
@@ -202,12 +203,13 @@ class CardsScreen(p.QtWidgets.QDialog):
 
     def addCard(self):
         text, okPressed = p.QtWidgets.QInputDialog.getText(self, "Question", "Add Question:", p.QtWidgets.QLineEdit.Normal, "")
-        if okPressed and text != '':
-            print(text)
+        # if okPressed and text != '':
+        #     print(text)
 
-        text, okPressed = p.QtWidgets.QInputDialog.getText(self, "Answer", "Add Answer:", p.QtWidgets.QLineEdit.Normal, "")
-        if okPressed and text != '':
-            print(text)
+        if okPressed:
+            text, okPressed = p.QtWidgets.QInputDialog.getText(self, "Answer", "Add Answer:", p.QtWidgets.QLineEdit.Normal, "")
+            # if okPressed and text != '':
+            #     print(text)
 
 class CardsOptionsScreen(p.QtWidgets.QDialog):
     def __init__(self, cardname, cardname_answer, parent=None):
