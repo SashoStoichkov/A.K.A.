@@ -159,7 +159,8 @@ class App:
         deck_name = self.app.getEntry('add-deck-name-entry')
         self.col.create_decks(deck_name)
         self.decks_updated()
-        self.app.hideSubWindow('add-deck-window')
+        self.app.clearEntry('add-deck-name-entry')
+        self.app.hideSubWindow('add-deck-window')        
     
     def create_add_deck_window(self):
         self.app.startSubWindow('add-deck-window')
