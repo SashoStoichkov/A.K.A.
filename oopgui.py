@@ -2,7 +2,6 @@ import utils
 
 from appJar import gui
 from const import DB_NAME
-# from session import Session
 from collection import Loader
 
 class Session:
@@ -49,6 +48,7 @@ class App:
         self.create_cards_window()
         self.create_add_card_window()
         self.create_study_deck_window()
+        self.create_edit_card_window()
 
     
     ################################################################################
@@ -70,6 +70,7 @@ class App:
         self.app.stopFrame()
 
     def study_deck(self, button):
+        print('study deck')
         deckname = self.app.getListBox('decks-list-box')[0]
         deck = self.col.find_deck(deckname)
         self.session = Session(deck)
@@ -77,6 +78,7 @@ class App:
         self.first_screen()
 
     def first_screen(self):
+        print('first screen')
         card = self.session.current_card
         self.app.emptySubWindow('study-deck-window')
         
@@ -187,9 +189,29 @@ class App:
 
     def edit_card(self, button):
         # get the card and show the window
-        card = self.get_current_card()
-        raise NotImplementedError        
-    
+        self.current_card = self.get_current_card()
+        self.app.clearTextArea('edit-front-text')
+        self.app.clearTextArea('edit-back-text')
+        self.app.setTextArea('edit-front-text', self.current_card.front)
+        self.app.setTextArea('edit-back-text', self.current_card.back)
+        self.app.showSubWindow('edit-card-window')
+
+    def create_edit_card_window(self):
+        self.app.startSubWindow('edit-card-window')
+        self.app.addTextArea('edit-front-text')
+        self.app.addTextArea('edit-back-text')
+        self.app.addButton('edit-card-save', self.edit_card_save)
+        self.app.setButton('edit-card-save', 'save')
+        self.app.stopSubWindow()
+
+    def edit_card_save(self):
+        front = self.app.getTextArea('edit-front-text')
+        back = self.app.getTextArea('edit-back-text')        
+        self.current_card.front = front
+        self.current_card.back = back
+        self.current_card.flush()
+        self.hideSubWindow('edit-card-window')
+        
     def create_cards_window(self):
         self.app.startSubWindow("cards-window", modal=True)
         self.app.setTitle("cards")
