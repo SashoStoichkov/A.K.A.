@@ -146,6 +146,7 @@ class App:
 
     def rename_deck(self, button):
         dotted_name = self.app.getListBox('decks-list-box')[0]
+        self.current_deck_name = dotted_name
         name = dotted_name.split('::')[-1]
         self.app.setEntry('rename-deck-entry', name)
         self.app.showSubWindow('rename-deck-window')
@@ -239,7 +240,7 @@ class App:
     # rename deck window
 
     def rename_deck_save(self, button):
-        dotted_name = self.app.getListBox('decks-list-box')[0]
+        dotted_name = self.current_deck_name
         current_deck = self.col.find_deck(dotted_name)
         new_name = self.app.getEntry('rename-deck-entry')
         current_deck.name = new_name
