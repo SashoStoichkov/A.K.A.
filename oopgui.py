@@ -109,7 +109,7 @@ class App:
         self.app.addMessage('back-after-show', card.back)
         self.app.addFrame('deck-show-buttons')
 
-        for k in range(5):
+        for k in range(6):
             self.app.addButton(f'button-{k}', self.take_answer,
                                row=0, column=k)
             self.app.setButton(f'button-{k}', f'{k}')
@@ -197,7 +197,7 @@ class App:
         self.app.showSubWindow('edit-card-window')
 
     def create_edit_card_window(self):
-        self.app.startSubWindow('edit-card-window')
+        self.app.startSubWindow('edit-card-window', modal=True)
         self.app.addTextArea('edit-front-text')
         self.app.addTextArea('edit-back-text')
         self.app.addButton('edit-card-save', self.edit_card_save)
@@ -210,7 +210,8 @@ class App:
         self.current_card.front = front
         self.current_card.back = back
         self.current_card.flush()
-        self.hideSubWindow('edit-card-window')
+        self.app.hideSubWindow('edit-card-window')
+        self.refresh_cards_list()
         
     def create_cards_window(self):
         self.app.startSubWindow("cards-window", modal=True)
