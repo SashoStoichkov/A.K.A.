@@ -70,7 +70,6 @@ class App:
         self.app.stopFrame()
 
     def study_deck(self, button):
-        print('study deck')
         deckname = self.app.getListBox('decks-list-box')[0]
         deck = self.col.find_deck(deckname)
         self.session = Session(deck)
@@ -78,7 +77,6 @@ class App:
         self.first_screen()
 
     def first_screen(self):
-        print('first screen')
         card = self.session.current_card
         self.app.emptySubWindow('study-deck-window')
         
