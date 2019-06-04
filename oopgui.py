@@ -1,3 +1,5 @@
+import utils
+
 from appJar import gui
 from const import DB_NAME
 # from session import Session
@@ -23,6 +25,7 @@ class Session:
     def update(self, answer):
         card = self.current_card
         card.reschedule(answer)
+        card.flush()
         
         if card.due == utils.today():
             self.cards.add(card)
@@ -82,19 +85,42 @@ class App:
         if card is None:
             # the deck has no more due cards for today
             self.app.openSubWindow('study-deck-window')
-            self.app.addLabel('no-more-cards', 'No more cards for today')
-            self.app.stopSubWindow()            
+            self.app.addLabel('no-more-cards', 'No more cards for today',
+                              row=0, column=0)
+            self.app.stopSubWindow()  
         else:
             self.app.openSubWindow('study-deck-window')
-            self.app.addMessage('front-before-show', card.front)
-            self.app.addButton('show-button', self.show_back)
+            self.app.addMessage('front-before-show', card.front,
+                                row=0, column=0)
+            self.app.addButton('show-button', self.show_back,
+                               row=1, column=0)
             self.app.setButton('show-button', 'show')
             self.app.stopSubWindow()
             
         self.app.showSubWindow('study-deck-window')
 
     def show_back(self):
-        pass
+        card = self.session.current_card
+
+        # draw the window
+        self.app.emptySubWindow('study-deck-window')
+        self.app.openSubWindow('study-deck-window')
+        self.app.addMessage('front-after-show', card.front)
+        self.app.addMessage('back-after-show', card.back)
+        self.app.addFrame('deck-show-buttons')
+
+        for k in range(5):
+            self.app.addButton(f'button-{k}', self.take_answer,
+                               row=0, column=k)
+            self.app.setButton(f'button-{k}', f'{k}')
+            
+        self.app.stopFrame()
+        self.stopSubWindow()
+        
+    def take_answer(self, button):
+        answer = int(button.split('-')[1])
+        self.session.update(answer)
+        self.first_screen()
     
     def create_study_deck_window(self):
         self.app.startSubWindow('study-deck-window')
