@@ -1,4 +1,5 @@
 import sqlite3
+import itertools
 
 import const
 import utils
@@ -232,3 +233,15 @@ class Collection:
         del deck.cards[card.id]
         card.conn.execute('DELETE FROM card WHERE id = ?', (card.id,))
         card.conn.commit()
+
+    ############################################################################
+    # utility functions
+
+    @property
+    def dotted_names_list(self):
+        """Returns a list of the dotted names of all decks."""
+        names = [deck.dotted_name[6:] for deck in self.main_deck.subdecks_iter]
+        names.reverse()
+        return names[1:]
+
+

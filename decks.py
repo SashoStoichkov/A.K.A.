@@ -41,7 +41,7 @@ class Deck:
         self.subdecks.remove(subdeck) # may raise ValueError
         
     def flush(self):
-        query = """UPDATE TABLE deck SET name = :name, parent_id = :parent_id
+        query = """UPDATE deck SET name = :name, parent_id = :parent_id
                    WHERE id = :id;
         """
         dct = dict(id=self.id, name=self.name,
@@ -106,3 +106,11 @@ class Deck:
                 return subdeck
 
         return None
+
+    @property
+    def dotted_name(self):
+        if self.parent is None:
+            return self.name
+
+        return self.parent.dotted_name + f'::{self.name}'
+    
