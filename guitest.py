@@ -1,11 +1,42 @@
+import random
+
 from appJar import gui
 import collection
 from const import DB_NAME
 
+class Session:
+    """
+    * attributes
+    - self.deck
+    - self.current_card
+    - self.cards    
+    """
+
+    def __init__(self, deck):
+        self.deck = deck
+        self.cards = set(deck.due_cards)
+        self.current_card = None
+
+    def start(self):
+        if self.cards:
+            self.current_card = self.cards.pop()
+
+    def update(self, answer):
+        card = self.current_card
+        card.reschedule(answer)
+        
+        if card.due == utils.today():
+            self.cards.add(card)
+
+        if self.cards:
+            self.current_card = self.cards.pop()
+        else:
+            self.current_card = None
 
 app = gui()
 col = collection.Loader(DB_NAME).load()
 questions = [f'question {i}' for i in range(10)]
+session = None
 
 ################################################################################
 # main window, showing the decks
@@ -13,10 +44,29 @@ questions = [f'question {i}' for i in range(10)]
 def decks_updated():
     # called when decks are added or removed or renamed
     app.updateListBox('decks-list-box', col.dotted_names_list)
-
+    
 def study_deck(button):
-    pass
+    # create the session
+    # check if there are cards to study in the deck    
+    # open the window in state 1
 
+    
+    deckname = app.getListBox('decks-list-box')
+    deck = col.find_deck(deckname)    
+    session = Session(deck)
+    session.start()
+    first_screen()
+    
+    
+def first_screen():
+    if session.current_card is None:
+        # show empty window
+
+def answer_button(button):
+    answer = # extract the answer from the string button
+    newcard = session.update(answer)
+    first_screen(newcard)
+    
 def add_deck(button):
     app.showSubWindow('add-deck-window')
     app.setFocus('add-deck-name-entry')
@@ -36,6 +86,8 @@ def rename_deck(button):
 def show_cards(button):
     app.showSubWindow("cards-window")
 
+def study_deck(button):
+    pass
     
 app.setTitle('decks')
     
@@ -139,3 +191,10 @@ app.setButton("add-card-save-button", "save")
 app.stopSubWindow()
 
 app.go()
+
+################################################################################
+# study window
+
+def show_answer(button):
+    pass
+

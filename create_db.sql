@@ -1,4 +1,3 @@
-BEGIN TRANSACTION;
 CREATE TABLE IF NOT EXISTS Deck(
     id INTEGER PRIMARY KEY, 
     name TEXT NOT NULL,
@@ -38,12 +37,11 @@ INSERT INTO card (front, back, ef, due, last_interval, deck_id) VALUES
 ('Python question 3', 'Python answer 3', 1.5, 6542, 98, 2);
 
 INSERT INTO card (front, back, ef, due, last_interval, deck_id) VALUES
-('C question 1', 'C answer 1', 1.2, 6542, 98, 2);
+('C question 1', 'C answer 1', 1.2, 6542, 98, 3);
 
 INSERT INTO card (front, back, ef, due, last_interval, deck_id) VALUES
-('C question 2', 'C answer 2', 1.2, 6542, 98, 2);
+('C question 2', 'C answer 2', 1.2, 6542, 98, 3);
 
 INSERT INTO card (front, back, ef, due, last_interval, deck_id) VALUES
-('C question 3', 'C answer 3', 1.2, 6542, 98, 2);
-END TRANSACTION;
+('C question 3', 'C answer 3', 1.2, 6542, 98, 3);
 
