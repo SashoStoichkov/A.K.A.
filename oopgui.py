@@ -55,8 +55,7 @@ class App:
     # main window, showing the decks
     
     def create_main_menu_window(self):
-        # drop down menu
-        self.app.setTitle('decks')
+        self.app.setTitle('decks')        
         self.app.addListBox('decks-list-box', self.col.dotted_names_list)
 
         self.app.startFrame('deck-buttons', row=1, column=0)
@@ -114,7 +113,7 @@ class App:
             self.app.setButton(f'button-{k}', f'{k}')
             
         self.app.stopFrame()
-        self.stopSubWindow()
+        self.app.stopSubWindow()
         
     def take_answer(self, button):
         answer = int(button.split('-')[1])
