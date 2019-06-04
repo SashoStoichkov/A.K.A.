@@ -151,7 +151,6 @@ class App:
         self.app.showSubWindow('rename-deck-window')
         self.app.setFocus('rename-deck-entry')
 
-
     ################################################################################
     # add deck window
     
@@ -173,16 +172,26 @@ class App:
     ################################################################################
     # cards window
 
+    def get_current_card(self):
+        front = self.app.getListBox("cards-questions-list")[0]
+        deck = self.col.find_deck(self.current_deck_name)
+        for i, card in enumerate(deck.cards.values()):
+            if card.front == front:
+                return card
+        raise ValueError('this should not happen')
+    
     def delete_card(self, button):
-        chosen = self.app.getListBox("cards-questions-list")
-        self.app.removeListItem("cards-questions-list", chosen)
+        self.col.remove_card(self.get_current_card())
+        self.refresh_cards_list()
 
     def add_card(self, button):
         self.app.showSubWindow("add-card-window")
 
     def edit_card(self, button):
-        pass
-
+        # get the card and show the window
+        card = self.get_current_card()
+        raise NotImplementedError        
+    
     def create_cards_window(self):
         self.app.startSubWindow("cards-window", modal=True)
         self.app.setTitle("cards")
