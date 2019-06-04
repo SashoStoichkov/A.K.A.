@@ -43,7 +43,7 @@ class Card:
         self.EF = max(1.3, min(2.5, self.EF - 0.8 + 0.28 * ans - 0.02 * ans * ans))
         if ans < 3:
             self.last_interval = None
-            self.due = utils.today() + 1
+            self.due = utils.today()
         else:
             self.last_interval = int(1 if self.last_interval is None
                                      else 6 if self.last_interval == 1

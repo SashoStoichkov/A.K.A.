@@ -41,6 +41,7 @@ class App:
         self.col = Loader(DB_NAME).load()
         self.questions = [f'question {i}' * 5 for i in range(10)]
         self.session = None
+        self.current_deck_name = None
         
         self.create_main_menu_window()
         self.create_rename_deck_window()
@@ -131,6 +132,8 @@ class App:
         self.app.updateListBox('decks-list-box', self.col.dotted_names_list)
 
     def show_cards(self, button):
+        self.current_deck_name = self.app.getListBox('decks-list-box')[0]
+        self.refresh_cards_list()
         self.app.showSubWindow("cards-window")
 
     def add_deck(self, button):
@@ -227,10 +230,18 @@ class App:
     # add card window
 
     def add_card_save(self, button):
-        newQ = self.app.getTextArea("add-card-front-text")
-        self.questions.append(newQ)
-        self.app.updateListBox("cards-questions-list", self.questions)
+        new_front = self.app.getTextArea("add-card-front-text")
+        new_back = self.app.getTextArea("add-card-back-text")
+        self.col.create_card(new_front, new_back, self.current_deck_name)        
+        self.refresh_cards_list()
+        self.app.clearTextArea('add-card-front-text')
+        self.app.clearTextArea('add-card-back-text')
 
+    def refresh_cards_list(self):
+        deck = self.col.find_deck(self.current_deck_name)
+        cards_list = [card.front for card in deck.cards.values()]
+        self.app.updateListBox('cards-questions-list', cards_list)        
+        
     def create_add_card_window(self):
         self.app.startSubWindow("add-card-window", modal=True)
         self.app.addTextArea("add-card-front-text", text=None)
